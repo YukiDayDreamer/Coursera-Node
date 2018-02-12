@@ -1,43 +1,43 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const dishRouter = express.Router();
+const leaderRouter = express.Router();
 
-dishRouter.use(bodyParser.json());
+leaderRouter.use(bodyParser.json());
 
-// use chain expression to process request of all dishes
-dishRouter.route('/')
+// use chain expression to process request of all leaders
+leaderRouter.route('/')
   .all((req, res, next) => { // handle all request
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text-plain');
     next(); // continue to process and pass the parameters to next request
   }).get((req, res, next) => { // handle get
-    res.end('Will send all the dishes to you!');
+    res.end('Will send all the leaders to you!');
   }).post((req, res, next) => { // handle post
-    res.end('Will add the dish: ' + req.body.name + ' with details: ' + req.body.description);
+    res.end('Will add the leader: ' + req.body.name + ' with details: ' + req.body.description);
   }).put((req, res, next) => { // handle put
     res.statusCode = 403;
-    res.end('PUT operation not supported on /dishes');
+    res.end('PUT operation not supported on /leaders');
   }).delete((req, res, next) => { // handle delete
-    res.end('Deleting all the dishes!');
+    res.end('Deleting all the leaders!');
   });
 
-// use chain expression to process request of specific dish
-dishRouter.route('/:dishId')
+// use chain expression to process request of specific leader
+leaderRouter.route('/:leaderId')
   .all((req, res, next) => { // handle all request
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text-plain');
     next(); // continue to process and pass the parameters to next request
   }).get((req, res, next) => { // handle get
-    res.end('Will send the dish: ' + req.params.dishId + ' to you!');
+    res.end('Will send the leader: ' + req.params.leaderId + ' to you!');
   }).post((req, res, next) => { // handle post
     res.statusCode = 403;
-    res.end('POST operation not supported on /dishes/' + req.params.dishId);
+    res.end('POST operation not supported on /leaders/' + req.params.leaderId);
   }).put((req, res, next) => { // handle put
-    res.write('Updating the dish: ' + req.params.dishId + '\n');
-    res.end('Will update the dish: ' + req.body.name + ' with details: ' + req.body.description);
+    res.write('Updating the leader: ' + req.params.leaderId + '\n');
+    res.end('Will update the leader: ' + req.body.name + ' with details: ' + req.body.description);
   }).delete((req, res, next) => { // handle delete
-    res.end('Deleting dish: ' + req.params.dishId);
+    res.end('Deleting leader: ' + req.params.leaderId);
   });
 
-module.exports = dishRouter;
+module.exports = leaderRouter;
