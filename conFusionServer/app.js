@@ -41,6 +41,38 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 app.use(cookieParser());
+
+// authorize user right before express server
+function auth(req, res, next) {
+  console.log(req.headers);
+
+  var authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    var err = new Error('You are not authenicated!');
+    res.setHeader('WWW-Authenticate', 'Basic');
+    err.status = 401;
+    next(err);
+    return;
+  }
+
+  var auth = new Buffer(authHeader.split(' ')[1], 'base64').toString().split(':'); // an array of two string
+  var username = auth[0];
+  var password = auth[1];
+
+  if (username === 'admin' && password === 'password') {
+    next(); // pass to other middlewares
+  }
+  else {
+    var err = new Error('You are not authenicated!');
+    res.setHeader('WWW-Authenticate', 'Basic');
+    err.status = 401;
+    return next(err);
+  }
+}
+
+app.use(auth);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
