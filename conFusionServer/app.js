@@ -40,34 +40,46 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: false
 }));
-app.use(cookieParser());
+app.use(cookieParser('12345-67890-09876-54321'));
 
 // authorize user right before express server
 function auth(req, res, next) {
-  console.log(req.headers);
+  if (!req.signedCookies.user) {
 
-  var authHeader = req.headers.authorization;
+    var authHeader = req.headers.authorization;
 
-  if (!authHeader) {
-    var err = new Error('You are not authenicated!');
-    res.setHeader('WWW-Authenticate', 'Basic');
-    err.status = 401;
-    next(err);
-    return;
-  }
+    if (!authHeader) {
+      var err = new Error('You are not authenicated!');
+      res.setHeader('WWW-Authenticate', 'Basic');
+      err.status = 401;
+      next(err);
+      return;
+    }
 
-  var auth = new Buffer(authHeader.split(' ')[1], 'base64').toString().split(':'); // an array of two string
-  var username = auth[0];
-  var password = auth[1];
+    var auth = new Buffer(authHeader.split(' ')[1], 'base64').toString().split(':'); // an array of two string
+    var username = auth[0];
+    var password = auth[1];
 
-  if (username === 'admin' && password === 'password') {
-    next(); // pass to other middlewares
+    if (username === 'admin' && password === 'password') {
+      res.cookie('user', 'admin', { signed: true });
+      next(); // pass to other middlewares
+    }
+    else {
+      var err = new Error('You are not authenicated!');
+      res.setHeader('WWW-Authenticate', 'Basic');
+      err.status = 401;
+      return next(err);
+    }
   }
   else {
-    var err = new Error('You are not authenicated!');
-    res.setHeader('WWW-Authenticate', 'Basic');
-    err.status = 401;
-    return next(err);
+    if (req.signedCookies.user === 'admin') {
+      next();
+    }
+    else {
+      var err = new Error('You are not authenticated!');
+      err.status = 401;
+      next(err);
+    }
   }
 }
 
