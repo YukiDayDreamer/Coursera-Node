@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const authenticate = require('../authenticate');
 
 const Promotions = require('../models/promotions');
 
@@ -10,7 +11,7 @@ promoRouter.use(bodyParser.json());
 
 // use chain expression to process request of all promos
 promoRouter.route('/')
-  .get((req, res, next) => { // handle get
+  .get((req, res, next) => { // open to all users
     Promotions.find({})
       .then((promotion) => {
         res.statusCode = 200;
@@ -19,7 +20,7 @@ promoRouter.route('/')
       }, (err) => next(err))
       .catch((err) => next(err));
   })
-  .post((req, res, next) => { // handle post
+  .post(authenticate.verifyUser, (req, res, next) => { // first verify user, then would allows to post
     Promotions.create(req.body)
       .then((promotion) => {
         console.log('Promotion created', promotion);
@@ -29,11 +30,11 @@ promoRouter.route('/')
       }, (err) => next(err))
       .catch((err) => next(err));
   })
-  .put((req, res, next) => { // handle put
+  .put(authenticate.verifyUser, (req, res, next) => { // first verify user, then would allows to put
     res.statusCode = 403;
     res.end('PUT operation not supported on /promotions');
   })
-  .delete((req, res, next) => { // handle delete
+  .delete(authenticate.verifyUser, (req, res, next) => {  // first verify user, then would allows to delete
     Promotions.remove({})
       .then((resp) => {
         res.statusCode = 200;
@@ -54,11 +55,11 @@ promoRouter.route('/:promoId')
       }, (err) => next(err))
       .catch((err) => next(err));
   })
-  .post((req, res, next) => { // handle post
+  .post(authenticate.verifyUser, (req, res, next) => { // handle post
     res.statusCode = 403;
     res.end('POST operation not supported on /promotions/' + req.params.promoId);
   })
-  .put((req, res, next) => { // handle put
+  .put(authenticate.verifyUser, (req, res, next) => { // handle put
     Promotions.findByIdAndUpdate(req.params.promoId, {
       $set: req.body
     }, { new: true })// return the updated promo
@@ -69,7 +70,7 @@ promoRouter.route('/:promoId')
       }, (err) => next(err))
       .catch((err) => next(err));
   })
-  .delete((req, res, next) => { // handle delete
+  .delete(authenticate.verifyUser, (req, res, next) => { // handle delete
     Promotions.findByIdAndRemove(req.params.promoId)
       .then((resp) => {
         res.statusCode = 200;
