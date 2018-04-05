@@ -10,8 +10,16 @@ var router = express.Router();
 router.use(bodyParser.json());
 
 /* GET users listing. */
-router.get('/', (req, res, next) => {
-  res.send('respond with a resource');
+router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+  // only admin can process into this function
+  console.log(req.user); // only print the admin user
+  User.find({})
+    .then((user) => {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json(user);
+    }, (err) => next(err))
+    .catch((err) => next(err));
 });
 
 // sign up
