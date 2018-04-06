@@ -2,6 +2,7 @@ var express = require('express');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 var User = require('../models/user');
+const cors = require('./cors');
 
 var authenticate = require('../authenticate');
 
@@ -10,7 +11,7 @@ var router = express.Router();
 router.use(bodyParser.json());
 
 /* GET users listing. */
-router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+router.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
   // only admin can process into this function
   console.log(req.user); // only print the admin user
   User.find({})
@@ -23,7 +24,7 @@ router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, ne
 });
 
 // sign up
-router.post('/signup', (req, res, next) => {
+router.post('/signup', cors.corsWithOptions, (req, res, next) => {
   // passport register function
   User.register(new User({ username: req.body.username }),
     req.body.password, (err, user) => {
@@ -55,7 +56,7 @@ router.post('/signup', (req, res, next) => {
 });
 
 // log in
-router.post('/login', passport.authenticate('local'), (req, res) => {
+router.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
 
   var token = authenticate.getToken({ _id: req.user._id });
 
